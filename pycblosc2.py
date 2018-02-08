@@ -6,52 +6,52 @@ ffi = FFI()
 ffi.cdef(
     """
     void blosc_init(void);
-    
+
     void blosc_destroy(void);
-    
+
     int blosc_compress(int clevel, int doshuffle, size_t typesize, size_t nbytes, const void* src, void* dest,
                        size_t destsize);
-    
+
     int blosc_decompress(const void* src, void* dest, size_t destsize);
-    
+
     int blosc_getitem(const void* src, int start, int nitems, void* dest);
-    
+
     int blosc_get_nthreads(void);
-    
+
     int blosc_set_nthreads(int nthreads);
-    
+
     char* blosc_get_compressor(void);
-    
+
     int blosc_set_compressor(const char* compname);
-    
+
     void blosc_set_delta(int dodelta);
-    
+
     int blosc_compcode_to_compname(int compcode, char** compname);
-    
+
     int blosc_compname_to_compcode(const char* compname);
-    
+
     char* blosc_list_compressors(void);
-    
+
     char* blosc_get_version_string(void);
-    
+
     int blosc_get_complib_info(char* compname, char** complib, char** version);
-    
+
     int blosc_free_resources(void);
-    
+
     void blosc_cbuffer_sizes(const void* cbuffer, size_t* nbytes, size_t* cbytes, size_t* blocksize);
-    
+
     void blosc_cbuffer_metainfo(const void* cbuffer, size_t* typesize, int* flags);
-    
+
     void blosc_cbuffer_versions(const void* cbuffer, int* version, int* versionlz);
-    
+
     char* blosc_cbuffer_complib(const void* cbuffer);
-    
+
     enum {
       BLOSC_MAX_FILTERS = 5, /* Maximum number of filters in the filter pipeline */
     };
-    
+
     typedef struct blosc2_context_s blosc2_context;
-    
+
     typedef struct {
       int compcode; /* the compressor codec */
       int clevel; /* the compression level (5) */
@@ -63,24 +63,24 @@ ffi.cdef(
       uint8_t filters[BLOSC_MAX_FILTERS]; /* the (sequence of) filters */
       uint8_t filters_meta[BLOSC_MAX_FILTERS]; /* metadata for filters */
     } blosc2_cparams;
-    
+
     typedef struct {
       int32_t nthreads; /* the number of threads to use internally (1) */
       void* schunk; /* the associated schunk, if any (NULL) */
     } blosc2_dparams;
-    
+
     blosc2_context* blosc2_create_cctx(blosc2_cparams cparams);
-    
+
     blosc2_context* blosc2_create_dctx(blosc2_dparams dparams);
-    
+
     void blosc2_free_ctx(blosc2_context* context);
-    
+
     int blosc2_compress_ctx( blosc2_context* context, size_t nbytes, const void* src, void* dest, size_t destsize );
-    
+
     int blosc2_decompress_ctx(blosc2_context* context, const void* src,  void* dest, size_t destsize);
-    
+
     int blosc2_getitem_ctx(blosc2_context* context, const void* src, int start, int nitems, void* dest);
-    
+
     typedef struct {
       uint8_t version;
       uint8_t flags1;
@@ -124,14 +124,15 @@ ffi.cdef(
       uint8_t* reserved;
       /* Reserved for the future. */
     } blosc2_schunk;
-    
-    
-    blosc2_schunk* blosc2_new_schunk( blosc2_cparams cparams, blosc2_dparams dparams );
-    
+
+    blosc2_schunk* blosc2_new_schunk(blosc2_cparams cparams, blosc2_dparams dparams);
+
     int blosc2_free_schunk(blosc2_schunk* sheader);
-    
+
     size_t blosc2_append_buffer(blosc2_schunk* sheader, size_t nbytes, void* src);
-    
+
+    int blosc2_decompress_chunk(blosc2_schunk* sheader, size_t nchunk, void* dest, size_t nbytes);
+
     """
 )
 
@@ -301,10 +302,15 @@ def blosc2_new_schunk(cparams, dparams):
     return C.blosc2_new_schunk(cparams, dparams)
 
 
-def blosc2_free_schunk(sheader):
-    return C.blosc2_free_schunk(sheader)
+def blosc2_free_schunk(schunk):
+    return C.blosc2_free_schunk(schunk)
 
 
-def blosc2_append_buffer(sheader, nbytes, src):
+def blosc2_append_buffer(schunk, nbytes, src):
     src = ffi.from_buffer(src)
-    return C.blosc2_append_buffer(sheader, nbytes, src)
+    return C.blosc2_append_buffer(schunk, nbytes, src)
+
+
+def blosc2_decompress_chunk(schunk, nchunk, dest, nbytes):
+    dest = ffi.from_buffer(dest)
+    return C.blosc2_decompress_chunk(schunk, nchunk, dest, nbytes)

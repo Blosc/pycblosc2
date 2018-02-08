@@ -63,7 +63,7 @@ class TestUM(unittest.TestCase):
                                             filters = [0, 0, 0, 0, 1],
                                             filters_meta = [0, 0, 0, 0, 0])
         cctx = cb2.blosc2_create_cctx(cparams)
-        dparams = cb2.blosc2_create_dparams(nthreads=1, schunk=None)
+        dparams = cb2.blosc2_create_dparams(nthreads = 1, schunk = None)
         dctx = cb2.blosc2_create_dctx(dparams)
         cb2.blosc2_compress_ctx(cctx, 1000000 * 4, self.arr_1, self.arr_2, 1000000 * 4)
         cb2.blosc2_decompress_ctx(dctx, self.arr_2, self.arr_3, 1000000 * 4)
@@ -71,6 +71,22 @@ class TestUM(unittest.TestCase):
         cb2.blosc2_getitem_ctx(dctx, self.arr_2, 1000, 10000, self.arr_aux)
         arr_1 = self.arr_1[1:11, :].reshape(100, 100)
         np.testing.assert_array_equal(arr_1, self.arr_aux)
+
+
+    def test_schunk(self):
+        cparams = cb2.blosc2_create_cparams(compcode = 1, clevel = 5, use_dict = 0, typesize = 4,
+                                            nthreads = 1, blocksize = 0, schunk = None,
+                                            filters = [0, 0, 0, 0, 1],
+                                            filters_meta = [0, 0, 0, 0, 0])
+        cparams.typesize = 4
+        cparams.filters[0] = 3
+        cparams.clevel = 9
+        dparams = cb2.blosc2_create_dparams(nthreads = 1, schunk = None)
+        schunk = cb2.blosc2_new_schunk(cparams, dparams)
+        nchunks = cb2.blosc2_append_buffer(schunk, 4 * 1000000, self.arr_1)
+        dsize = cb2.blosc2_decompress_chunk(schunk, nchunks - 1, self.arr_3, 4 * 1000000)
+        np.testing.assert_array_equal(self.arr_1, self.arr_3)
+
 
 
 if __name__ == '__main__':
