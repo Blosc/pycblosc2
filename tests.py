@@ -31,10 +31,13 @@ class TestUM(unittest.TestCase):
         self.assertEqual(n, 2)
 
 
-    def test_compressor(self):
-        cb2.blosc_set_compressor("lz4hc")
+    def test_set_compressor(self):
+        cb2.blosc_set_compressor('lz4hc')
         n = cb2.blosc_get_compressor()
-        self.assertEqual(n, "lz4hc")
+        self.assertEqual(n, 'lz4hc')
+        cb2.blosc_set_compressor(b'lz4')
+        n = cb2.blosc_get_compressor()
+        self.assertEqual(n, 'lz4')
 
 
     def test_ratio(self):
@@ -87,6 +90,12 @@ class TestUM(unittest.TestCase):
         dsize = cb2.blosc2_decompress_chunk(schunk, nchunks - 1, self.arr_3, 4 * 1000000)
         np.testing.assert_array_equal(self.arr_1, self.arr_3)
 
+
+    def test_blocksize(self):
+        n = cb2.blosc_get_blocksize()
+        cb2.blosc_set_blocksize(2*n)
+        m = cb2.blosc_get_blocksize()
+        self.assertEqual(n, m)
 
 
 if __name__ == '__main__':

@@ -133,6 +133,11 @@ ffi.cdef(
 
     int blosc2_decompress_chunk(blosc2_schunk* sheader, size_t nchunk, void* dest, size_t nbytes);
 
+    int blosc_get_blocksize(void);
+
+    void blosc_set_blocksize(size_t blocksize);
+
+    void blosc_set_schunk(blosc2_schunk* schunk);
     """
 )
 
@@ -178,7 +183,10 @@ def blosc_get_compressor():
 
 
 def blosc_set_compressor(compname):
-    compname = ffi.new("char[]", compname.encode('utf8'))
+    if type(compname) == str:
+        compname = ffi.new("char[]", compname.encode("utf-8"))
+    else:
+        cmpname = ffi.new("char[]", compname)
     return C.blosc_set_compressor(compname)
 
 
@@ -314,3 +322,15 @@ def blosc2_append_buffer(schunk, nbytes, src):
 def blosc2_decompress_chunk(schunk, nchunk, dest, nbytes):
     dest = ffi.from_buffer(dest)
     return C.blosc2_decompress_chunk(schunk, nchunk, dest, nbytes)
+
+
+def blosc_get_blocksize():
+    return C.blosc_get_blocksize()
+
+
+def blosc_set_blocksize(blocksize):
+    return C.blosc_set_blocksize(blocksize)
+
+
+def blosc_set_schunk(schunk):
+    return C.blosc_set_schunk(schunk)
