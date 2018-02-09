@@ -44,6 +44,12 @@ In [8]: np.testing.assert_array_equal(a, c)
 $ python tests.py
 ```
 
+## Installation
+
+```
+$ python setup.py install
+```
+
 
 ## Authors
 
