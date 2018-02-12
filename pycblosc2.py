@@ -195,7 +195,7 @@ def blosc_set_compressor(compname):
     if type(compname) == str:
         compname = ffi.new("char[]", compname.encode("utf-8"))
     else:
-        cmpname = ffi.new("char[]", compname)
+        compname = ffi.new("char[]", compname)
     return C.blosc_set_compressor(compname)
 
 
@@ -205,26 +205,34 @@ def blosc_set_delta(dodelta):
 
 def blosc_compcode_to_compname(compcode):
     compname = ffi.new("char **")
-    return C.blosc_compcode_to_compname(compcode, compname), ffi.string(compname[0])
+    return (C.blosc_compcode_to_compname(compcode, compname), ffi.string(compname[0]).decode("utf-8"))
 
 
 def blosc_compname_to_compcode(compname):
-    compname = ffi.cast("char*", compname)
+    if type(compname) == str:
+        compname = ffi.new("char[]", compname.encode("utf-8"))
+    else:
+        compname = ffi.new("char[]", compname)
     return C.blosc_compname_to_compcode(compname)
 
 
 def blosc_list_compressors():
-    return ffi.string(C.blosc_list_compressors())
+    return ffi.string(C.blosc_list_compressors()).decode('utf8')
 
 
 def blosc_get_version_string():
-    return ffi.string(C.blosc_get_version_string())
+    return ffi.string(C.blosc_get_version_string()).decode('utf8')
 
 
 def blosc_get_complib_info(compname):
+    if type(compname) == str:
+        compname = ffi.new("char[]", compname.encode("utf-8"))
+    else:
+        compname = ffi.new("char[]", compname)
     complib = ffi.new("char **")
     version = ffi.new("char **")
-    return C.blosc_get_complib_info(compname, complib, version), ffi.string(complib[0]), ffi.string(version[0])
+    return (C.blosc_get_complib_info(compname, complib, version), ffi.string(complib[0]).decode("utf-8"),
+            ffi.string(version[0]))
 
 
 def blosc_free_resources():
@@ -253,12 +261,12 @@ def blosc_cbuffer_versions(cbuffer):
     versionlz = ffi.new("int *")
     cbuffer = ffi.from_buffer(cbuffer)
     C.blosc_cbuffer_versions(cbuffer, version, versionlz)
-    return version[0], versionlz[0]
+    return (version[0], versionlz[0])
 
 
 def blosc_cbuffer_complib(cbuffer):
     cbuffer = ffi.from_buffer(cbuffer)
-    return ffi.string(C.blosc_cbuffer_complib(cbuffer))
+    return ffi.string(C.blosc_cbuffer_complib(cbuffer)).decode('utf8')
 
 
 #####################
