@@ -80,9 +80,9 @@ class TestUM(unittest.TestCase):
     def test_blocksize(self):
         n = cb2.blosc_get_blocksize()
         self.assertEqual(n, 0)
-        cb2.blosc_set_blocksize(4)
+        cb2.blosc_set_blocksize(32 * 1024)
         m = cb2.blosc_get_blocksize()
-        self.assertEqual(m, 4)
+        self.assertEqual(m, 32 * 1024)
 
     def test_string_decode(self):
         cb2.blosc_compress(5, 1, 4, 1000000 * 4, self.arr_1, self.arr_2, 1000000 * 4)
