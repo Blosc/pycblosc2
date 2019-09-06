@@ -6,7 +6,7 @@ A simple Python/CFFI interface for the C-Blosc2 library.
 
 This tries to be a low level interface for C-Blosc2.  Maybe in the future more high-level function could be added too.
 
-This package is meant to be used in Python3.  Python is not tested at all, so use it at your own risk.
+This package is meant to be used in Python3.  Python2 is not tested at all, so use it at your own risk.
 
 ## Simple usage
 
